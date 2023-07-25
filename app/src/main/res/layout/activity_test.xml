@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TestActivity"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="10dp"
+        android:paddingLeft="20dp"
+        android:layout_marginRight="20dp">
+
+       <LinearLayout
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:layout_weight="1"
+           android:gravity="center"
+           android:orientation="horizontal">
+
+           <TextView
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="Rtsp："
+               android:textColor="#E6000000"
+               android:textSize="24sp"/>
+
+           <EditText
+               android:id="@+id/rtsp_txt"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:hint="请输入Rtsp地址"
+               android:padding="10dp"
+               android:singleLine="true"
+               android:background="@drawable/edit_bg"/>
+
+       </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_marginLeft="20dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="窗口数量："
+                android:textColor="#E6000000"
+                android:textSize="24sp"/>
+
+            <ImageView
+                android:id="@+id/jian_img"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/jian"/>
+
+            <EditText
+                android:id="@+id/num_edit"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edit_bg"
+                android:gravity="center"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:phoneNumber="true"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"/>
+
+            <ImageView
+                android:id="@+id/jia_img"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/jia"/>
+
+        </LinearLayout>
+
+        <Switch
+            android:id="@+id/switch_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:checked="false"
+            android:thumb="@drawable/thumb"
+            android:track="@drawable/track"
+            android:layout_marginStart="20dp"
+            android:textOff="OFF"
+            android:textOn="ON"
+            android:showText="true"
+            android:gravity="center"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:background="@drawable/chuangkou"
+        android:layout_margin="20dp">
+
+    </RelativeLayout>
+
+</LinearLayout>

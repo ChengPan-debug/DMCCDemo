@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="switchStyleDefault" parent="@style/TextAppearance.AppCompat.Widget.Switch">
+        <item name="android:textColor">#bbbbbb</item>
+    </style>
+
+    <style name="switchStyleCheck" parent="@style/TextAppearance.AppCompat.Widget.Switch">
+        <item name="android:textColor">@color/colorTheme</item>
+    </style>
+
+</resources>
