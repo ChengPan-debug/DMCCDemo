@@ -2,6 +2,7 @@ package com.example.dmccdemo;
 
 import android.content.Context;
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.os.Build;
 import android.os.SystemClock;
@@ -31,12 +32,10 @@ public class MediaCodecSurfaceViews extends SurfaceView {
     private int mVideoHeight;
 
     //解码帧率 1s解码30帧
-    private final int FRAME_RATE = 30;
+    private final int FRAME_RATE = 10;
 
     //支持格式
     private final String VIDEOFORMAT_H264 = "video/avc";
-    private final String VIDEOFORMAT_MPEG4 = "video/mp4v-es";
-    private final String VIDEOFORMAT_HEVC = "video/hevc";
 
     //默认格式
     private String mMimeType = VIDEOFORMAT_H264;
@@ -55,6 +54,15 @@ public class MediaCodecSurfaceViews extends SurfaceView {
     private Surface mSurface;
 
     private ReentrantLock lock = new ReentrantLock(true);
+
+    public MediaCodecSurfaceViews(Context context) {
+        super(context);
+        try {
+            getHolder().addCallback(mCallback);
+        }catch (Exception e){
+            Log.e(TAG, "MediaCodecSurfaceViews: ",e );
+        }
+    }
 
 
     public MediaCodecSurfaceViews(Context context, AttributeSet attrs) {
@@ -120,6 +128,9 @@ public class MediaCodecSurfaceViews extends SurfaceView {
 
         //初始化解码器格式
         MediaFormat mediaformat = MediaFormat.createVideoFormat(mMimeType, mVideoWidth, mVideoHeight);
+        mediaformat.setInteger(MediaFormat.KEY_BIT_RATE,20000000);
+        mediaformat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ);
+        mediaformat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0);
         //设置帧率
         mediaformat.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
         //crypto:数据加密 flags:编码器/编码器
@@ -190,7 +201,7 @@ public class MediaCodecSurfaceViews extends SurfaceView {
             MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
             long startMs = System.currentTimeMillis();
             DataInfo dataInfo;
-            byte[] mDataBytes = new byte[2048];
+            byte[] mDataBytes = new byte[1024];
             ArrayList<DataInfo> mList = mFrmList;
             while (isRunning) {
                 if (mList.isEmpty()) {

@@ -1,13 +1,19 @@
 package com.example.dmccdemo;
 
+import static android.content.ContentValues.TAG;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -38,10 +44,11 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     private int videoWidth = 100; // 设置视频宽度
     private int videoHeight = 100; // 设置视频高度
     private long lastClickTime = 0;
+    private static final boolean mStopFlag = false;
     private static final long DOUBLE_CLICK_TIME_DELTA = 300; // 双击事件的时间间隔阈值
 
 
-    private String uri = "rtsp://192.168.20.222:8554/10002/20230726165858";
+    private String uri = "rtsp://192.168.20.222:8554/10002/20230801090441";
 
 
     @Override
@@ -63,7 +70,6 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
         jiaImg.setOnClickListener(this);
         jianImg.setOnClickListener(this);
-//        numEdit.setOnEditorActionListener((v, actionId, event) -> false);
         numEdit.addTextChangedListener(textWatcher);
 
         //开关按钮设置监听状态改变事件
@@ -103,64 +109,56 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
-    RelativeLayout container;
-
-    private void addRtspWindow(int i) {
-        // Create and start a new RTSP window
-        MediaCodecSurfaceViews surfaceView = new MediaCodecSurfaceViews(this,null);
-        int videoWidth = 400; // 设置视频宽度
-        int videoHeight = 300; // 设置视频高度
-        // 设置 VideoView 的 ID，方便后续引用
-        surfaceView.setId(View.generateViewId());
-
-
-        surfaceView.setWidthAndHeight(1920,1080);
-
-        // 设置 VideoView 的位置和大小
-//        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(videoWidth, videoHeight);
-//        params.leftMargin = i * 100; // 设置每个 VideoView 的水平间距
-//        surfaceView.setLayoutParams(params);
-
-        surfaceView.setOnTouchListener(TestActivity.this); // 为每个 VideoView 添加触摸事件监听器
-
-        container.addView(surfaceView);
-
-    }
-
     //开多个窗口
     public void startRtspWindows(){
-        int receiver = TestActivity.createRtspReceiver(uri);
         container = findViewById(R.id.container);
         NUM_VIDEOS = Integer.parseInt(numEdit.getText().toString());
-//        for (int i = 0; i < NUM_VIDEOS; i++) {
-//            addRtspWindow(i);
-//        }
-        // 循环创建多个 VideoView
-//        for (int i = 0; i < NUM_VIDEOS; i++) {
-//            VideoView videoView = new VideoView(this);
-//            int videoWidth = 200; // 设置视频宽度
-//            int videoHeight = 150; // 设置视频高度
-//
-//            // 设置 VideoView 的 ID，方便后续引用
-//            videoView.setId(View.generateViewId());
-//
-//            // 设置 VideoView 的位置和大小
-//            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(videoWidth, videoHeight);
-//            params.leftMargin = i * 100; // 设置每个 VideoView 的水平间距
-//            videoView.setLayoutParams(params);
-//
-//            // 设置 VideoView 的路径或 URL
-//            videoView.setVideoPath(uri);
-//
-//            videoView.setOnTouchListener(TestActivity.this); // 为每个 VideoView 添加触摸事件监听器
-//
-//            container.addView(videoView);
-//
-//            videoView.requestFocus();
-//
-//            videoView.start();
-//
-//        }
+        for (int i = 0; i < NUM_VIDEOS; i++) {
+            addRtspWindow(i);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private String type = "hard";
+    RelativeLayout container;
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void addRtspWindow(int i) {
+        int videoWidth = 800; // 设置视频宽度
+        int videoHeight = 600; // 设置视频高度
+        //设置 VideoView 的位置和大小
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(videoWidth, videoHeight);
+        params.leftMargin = i * 100; // 设置每个 VideoView 的水平间距
+        switch (type){
+            case "hard":
+                // Create and start a new RTSP window
+                MediaCodecSurfaceViews surfaceView = new MediaCodecSurfaceViews(this);
+                // 设置 VideoView 的 ID，方便后续引用
+                surfaceView.setId(View.generateViewId());
+                surfaceView.setWidthAndHeight(1920,1080);
+                //设置 VideoView 的位置和大小
+                surfaceView.setLayoutParams(params);
+                surfaceView.setOnTouchListener(TestActivity.this); // 为每个 VideoView 添加触摸事件监听器
+                container.addView(surfaceView);
+                new MyFloatingThread(surfaceView).start();
+                break;
+            case "soft":
+                // Create and start a new RTSP window
+                YuvPlayerView yuvPlayerView = new YuvPlayerView(this);
+                // 设置 VideoView 的 ID，方便后续引用
+                yuvPlayerView.setId(View.generateViewId());
+                yuvPlayerView.setWidthAndHeight(1920,1080);
+
+                yuvPlayerView.setLayoutParams(params);
+                yuvPlayerView.setOnTouchListener(TestActivity.this); // 为每个 VideoView 添加触摸事件监听器
+                container.addView(yuvPlayerView);
+                new MyFloatingThread().start();
+                break;
+        }
     }
 
     private void removeRtspWindow() {
@@ -257,6 +255,106 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
+    class MyFloatingThread extends Thread {
+        private  MediaCodecSurfaceViews surfaceView;
+
+        public MyFloatingThread() {
+        }
+        
+        public MyFloatingThread(MediaCodecSurfaceViews surfaceView) {
+            this.surfaceView = surfaceView;
+        }
+
+        @Override
+        public void run() {
+            int times = 0;
+            while (times < 30) {
+                if (type.contains("hard") ? hardRecScreen(surfaceView) :  softRecScreen()) {
+                    break;
+                } else {
+                    times++;
+                    Log.e(TAG, "not rec" + times +"次");
+                }
+
+            }
+        }
+    }
+
+    private boolean hardRecScreen(MediaCodecSurfaceViews mSurfaceView) {
+        try {
+            int receiver = createRtspReceiver(uri);
+            if (receiver != 0) {
+                releaseRtspRecv();
+                Thread.sleep(2000);
+                return false;
+            }
+
+            boolean isFirstFrame = true;
+
+            Log.e(TAG, "createReceiver" + receiver);
+            int continuous = 0;
+            while(!mStopFlag) {
+
+                byte[] streamBuffer = recvRtspVideoPacket(30);
+                System.out.println(streamBuffer.length);
+                if (streamBuffer.length == 0) {
+                    continuous++;
+                    Thread.sleep(30);
+                    continue;
+                } else {
+                    continuous = 0;
+                    if(isFirstFrame) {
+                        isFirstFrame = false;
+                        continue;
+                    }
+                }
+                mSurfaceView.setData(streamBuffer);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "recScreen: ", e);
+        }
+        return true;
+    }
+
+    private boolean softRecScreen() {
+
+        InitffmpegRTP();//初始化软解码
+        
+        try {
+            int receiver = createRtspReceiver(uri);
+            if (receiver != 0) {
+                ReleaseFFMPEGRTP();
+                Thread.sleep(2000);
+                return false;
+            }
+
+            boolean isFirstFrame = true;
+
+            Log.e(TAG, "createReceiver" + receiver);
+            int continuous = 0;
+            while(!mStopFlag) {
+
+                byte[] streamBuffer = recvRtspVideoPacket(30);
+                System.out.println(streamBuffer.length);
+                if (streamBuffer.length == 0) {
+                    continuous++;
+                    Thread.sleep(30);
+                    continue;
+                } else {
+                    continuous = 0;
+                    if(isFirstFrame) {
+                        isFirstFrame = false;
+                        continue;
+                    }
+                }
+                SetFFMPEGRTPData(streamBuffer, streamBuffer.length);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "recScreen: ", e);
+        }
+        return true;
+    }
+
     private void handleDoubleClick(View v) {
         // 在这里处理双击事件的逻辑
         // 例如，执行双击后的操作或显示提示
@@ -272,6 +370,14 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     public static native byte[] recvRtspVideoPacket(int timeout);
 
     public static native void releaseRtspRecv();
+
+    public static native int InitffmpegRTP();
+
+    public static native int PlayffmpegRTPYUV(Surface surface, int screenWidth, int screenHeight);
+
+    public static native int SetFFMPEGRTPData(byte[] data, int dataLength);
+
+    public static native int ReleaseFFMPEGRTP();
 
     @Override
     protected void onDestroy() {
