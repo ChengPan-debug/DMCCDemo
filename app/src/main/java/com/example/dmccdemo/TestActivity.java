@@ -200,13 +200,20 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    int offsetX;
+    int offsetY;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        float x = event.getRawX();
-        float y = event.getRawY();
+        int x = (int) event.getRawX();
+        int y =  (int) event.getRawY();
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+
+                offsetX = x - v.getLeft();
+                offsetY = y - v.getTop();
+
                 // 当手指按下时，记录下初始位置，用于后续计算偏移量
                 v.setTag(R.id.tag_video_view_origin_x, event.getRawX());
                 v.setTag(R.id.tag_video_view_origin_y, event.getRawY());
@@ -221,8 +228,8 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case MotionEvent.ACTION_MOVE:
                 // Calculate the delta change in position
-                float dX = x - (float) v.getTag(R.id.tag_video_view_origin_x);
-                float dY = y - (float) v.getTag(R.id.tag_video_view_origin_y);
+                int dX = x - (int) v.getTag(R.id.tag_video_view_origin_x);
+                int dY = y - (int) v.getTag(R.id.tag_video_view_origin_y);
 
                 // Calculate the new position for the VideoView
                 RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();
@@ -249,7 +256,13 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 // Update the initial position for the next move
                 v.setTag(R.id.tag_video_view_origin_x, x);
                 v.setTag(R.id.tag_video_view_origin_y, y);
-                v.setTag(R.id.tag_video_view_origin_y, y);
+                break;
+            case MotionEvent.ACTION_UP:
+                int currentX = x - offsetX;
+                int currentRight = currentX + v.getWidth();
+                if (currentX < 0 || currentRight > container.getWidth()) {
+                    container.removeView(v);
+                }
                 break;
         }
         return true;

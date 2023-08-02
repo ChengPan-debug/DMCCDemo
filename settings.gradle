@@ -14,3 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "DMCCDemo"
 include ':app'
+include ':ijkplayer-java'
+include ':ijkplayer-java'

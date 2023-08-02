@@ -1,0 +1,28 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'tv.danmaku.ijk.media.player'
+    compileSdkVersion 33
+    lintOptions {
+        abortOnError false
+    }
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 33
+        consumerProguardFiles 'proguard-rules.pro'
+        versionCode 38
+        versionName "1.1.17.1124"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    buildToolsVersion '28.0.3'
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+}
+
