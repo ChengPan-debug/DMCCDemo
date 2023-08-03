@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -26,7 +27,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.dmccdemo.ijkplayer.views.ProVideoView;
+import com.example.dmccdemo.ijkplayer.views.VideoControllerView;
 
 public class TestActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener {
 
@@ -114,7 +119,9 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         container = findViewById(R.id.container);
         NUM_VIDEOS = Integer.parseInt(numEdit.getText().toString());
         for (int i = 0; i < NUM_VIDEOS; i++) {
-            addRtspWindow(i);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                addRtspWindow(i);
+            }
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -126,6 +133,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     private String type = "hard";
     RelativeLayout container;
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private void addRtspWindow(int i) {
         int videoWidth = 800; // 设置视频宽度
@@ -134,6 +142,22 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(videoWidth, videoHeight);
         params.leftMargin = i * 100; // 设置每个 VideoView 的水平间距
         switch (type){
+            case "ijkplayer":
+                ProVideoView proVideoView = new ProVideoView(this);
+                // 设置 ProVideoView 的 ID，方便后续引用
+                proVideoView.setId(View.generateViewId());
+                proVideoView.setLayoutParams(params);
+                proVideoView.setOnTouchListener(TestActivity.this); // 为每个 VideoView 添加触摸事件监听器
+                container.addView(proVideoView);
+
+                VideoControllerView mediaController = new VideoControllerView(this);
+
+                mediaController.setMediaPlayer(proVideoView);
+
+                proVideoView.setVideoPath(uri);
+
+                proVideoView.start();
+                break;
             case "hard":
                 // Create and start a new RTSP window
                 MediaCodecSurfaceViews surfaceView = new MediaCodecSurfaceViews(this);
@@ -192,7 +216,9 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 NUM_VIDEOS ++;
                 numEdit.setText(NUM_VIDEOS + "");
                 if(switchBtn.isChecked()){
-                    addRtspWindow(0);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        addRtspWindow(0);
+                    }
                 }
             }else {
                 Toast.makeText(this,"开窗数量不能大于100",Toast.LENGTH_SHORT).show();

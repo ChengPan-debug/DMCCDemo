@@ -54,11 +54,11 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
     private String mVideoPath;
     private Uri mVideoUri;
 
-    private ProVideoView videoView,videoView2,videoView3,videoView4;        // 播放器View
+    private ProVideoView videoView,videoView2,videoView3,videoView4,videoView5,videoView6;        // 播放器View
 
     private GestureDetector detector;
 
-    private VideoControllerView mediaController,mediaController2,mediaController3,mediaController4;
+    private VideoControllerView mediaController,mediaController2,mediaController3,mediaController4,mediaController5,mediaController6;
     private MediaScannerConnection mScanner;
 
     private Runnable mSpeedCalcTask;
@@ -89,9 +89,11 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
         videoView2 = findViewById(R.id.video_view2);
         videoView3 = findViewById(R.id.video_view3);
         videoView4 = findViewById(R.id.video_view4);
+        videoView5 = findViewById(R.id.video_view5);
+        videoView6 = findViewById(R.id.video_view6);
 
         // handle arguments
-        mVideoPath = "rtsp://192.168.20.222:8554/10002/20230802134750";
+        mVideoPath = "rtsp://192.168.20.222:8554/10002/20230803165048";
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
@@ -133,6 +135,10 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
         mediaController3.setMediaPlayer(videoView3);
         mediaController4 = new VideoControllerView(this);
         mediaController4.setMediaPlayer(videoView4);
+        mediaController5 = new VideoControllerView(this);
+        mediaController5.setMediaPlayer(videoView5);
+        mediaController6 = new VideoControllerView(this);
+        mediaController6.setMediaPlayer(videoView6);
 
         videoView .setOnInfoListener((iMediaPlayer, arg1, arg2) -> {
             switch (arg1) {
@@ -185,11 +191,15 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
             videoView2.setVideoPath(mVideoPath);
             videoView3.setVideoPath(mVideoPath);
             videoView4.setVideoPath(mVideoPath);
+            videoView5.setVideoPath(mVideoPath);
+            videoView6.setVideoPath(mVideoPath);
         } else if (mVideoUri != null) {
             videoView.setVideoURI(mVideoUri);
             videoView2.setVideoURI(mVideoUri);
             videoView3.setVideoURI(mVideoUri);
             videoView4.setVideoURI(mVideoUri);
+            videoView5.setVideoURI(mVideoUri);
+            videoView6.setVideoURI(mVideoUri);
         } else {
             Log.e(TAG, "Null Data Source\n");
             finish();
@@ -203,6 +213,10 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
         videoView3.start();
 
         videoView4.start();
+
+        videoView5.start();
+
+        videoView6.start();
 
         GestureDetector.SimpleOnGestureListener listener = new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -230,6 +244,8 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
         videoView2.setOnTouchListener(this);
         videoView3.setOnTouchListener(this);
         videoView4.setOnTouchListener(this);
+        videoView5.setOnTouchListener(this);
+        videoView6.setOnTouchListener(this);
 
     }
 
@@ -316,9 +332,9 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
                 int currentRight = currentX + v.getWidth();
                 int currentTop = currentY + v.getHeight();
 
-                if (currentX < 0 || currentRight > line1.getWidth() || currentTop > line1.getHeight()) {
-                    line1.removeView(v);
-                }
+//                if (currentX < 0 || currentRight > line1.getWidth() || currentTop > line1.getHeight()) {
+//                    line1.removeView(v);
+//                }
                 break;
         }
 
