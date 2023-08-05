@@ -53,13 +53,14 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     private static final long DOUBLE_CLICK_TIME_DELTA = 300; // 双击事件的时间间隔阈值
 
 
-    private String uri = "rtsp://192.168.20.222:8554/10002/20230801090441";
+    private String uri = "rtsp://192.168.20.222:8554/10002/20230805093831";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        ProVideoView.setKey("EasyPlayer is free!");
         initView();
     }
 
@@ -80,9 +81,9 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         //开关按钮设置监听状态改变事件
         switchBtn.setOnCheckedChangeListener((compoundButton, b) -> {
             System.out.println("开关按钮的状态 = " + b);
-            if(b){
+            if (b) {
                 startRtspWindows();
-            }else {
+            } else {
                 closeAllRtspWindows();
             }
             //设置改变字体颜色
@@ -115,22 +116,17 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     };
 
     //开多个窗口
-    public void startRtspWindows(){
+    public void startRtspWindows() {
         container = findViewById(R.id.container);
         NUM_VIDEOS = Integer.parseInt(numEdit.getText().toString());
         for (int i = 0; i < NUM_VIDEOS; i++) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 addRtspWindow(i);
             }
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
-    private String type = "hard";
+    private String type = "ijkplayer";
     RelativeLayout container;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -141,7 +137,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         //设置 VideoView 的位置和大小
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(videoWidth, videoHeight);
         params.leftMargin = i * 100; // 设置每个 VideoView 的水平间距
-        switch (type){
+        switch (type) {
             case "ijkplayer":
                 ProVideoView proVideoView = new ProVideoView(this);
                 // 设置 ProVideoView 的 ID，方便后续引用
@@ -163,7 +159,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 MediaCodecSurfaceViews surfaceView = new MediaCodecSurfaceViews(this);
                 // 设置 VideoView 的 ID，方便后续引用
                 surfaceView.setId(View.generateViewId());
-                surfaceView.setWidthAndHeight(1920,1080);
+                surfaceView.setWidthAndHeight(1920, 1080);
                 //设置 VideoView 的位置和大小
                 surfaceView.setLayoutParams(params);
                 surfaceView.setOnTouchListener(TestActivity.this); // 为每个 VideoView 添加触摸事件监听器
@@ -175,7 +171,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 YuvPlayerView yuvPlayerView = new YuvPlayerView(this);
                 // 设置 VideoView 的 ID，方便后续引用
                 yuvPlayerView.setId(View.generateViewId());
-                yuvPlayerView.setWidthAndHeight(1920,1080);
+                yuvPlayerView.setWidthAndHeight(1920, 1080);
 
                 yuvPlayerView.setLayoutParams(params);
                 yuvPlayerView.setOnTouchListener(TestActivity.this); // 为每个 VideoView 添加触摸事件监听器
@@ -201,93 +197,117 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.jian_img){
-            if(NUM_VIDEOS > 1){
-                NUM_VIDEOS --;
+        if (v.getId() == R.id.jian_img) {
+            if (NUM_VIDEOS > 1) {
+                NUM_VIDEOS--;
                 numEdit.setText(NUM_VIDEOS + "");
-                if(switchBtn.isChecked()){
+                if (switchBtn.isChecked()) {
                     removeRtspWindow();
                 }
-            }else {
-                Toast.makeText(this,"开窗数量不能少于0",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "开窗数量不能少于0", Toast.LENGTH_SHORT).show();
             }
-        }else if (v.getId() == R.id.jia_img){
-            if(NUM_VIDEOS <= 100){
-                NUM_VIDEOS ++;
+        } else if (v.getId() == R.id.jia_img) {
+            if (NUM_VIDEOS <= 100) {
+                NUM_VIDEOS++;
                 numEdit.setText(NUM_VIDEOS + "");
-                if(switchBtn.isChecked()){
+                if (switchBtn.isChecked()) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                         addRtspWindow(0);
                     }
                 }
-            }else {
-                Toast.makeText(this,"开窗数量不能大于100",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "开窗数量不能大于100", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    int offsetX;
-    int offsetY;
+    float i = 1.0f;
+
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+    private void toggleZoom(View view) {
+        if (view.getTag(R.id.tag_view_scale)) {
+            // 缩小控件
+            view.setScaleX(0.5f);
+            view.setScaleY(0.5f);
+            view.setTag(R.id.tag_view_scale,false);
+        } else {
+            // 放大控件
+            view.setScaleX(1.0f);
+            view.setScaleY(1.0f);
+            view.setTag(R.id.tag_view_scale,true);
+        }
+    }
+
+    private float x;
+    private float y;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        int x = (int) event.getRawX();
-        int y =  (int) event.getRawY();
-
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-
-                offsetX = x - v.getLeft();
-                offsetY = y - v.getTop();
 
                 // 当手指按下时，记录下初始位置，用于后续计算偏移量
                 v.setTag(R.id.tag_video_view_origin_x, event.getRawX());
                 v.setTag(R.id.tag_video_view_origin_y, event.getRawY());
                 long clickTime = System.currentTimeMillis();
-                 //计算两次点击的时间间隔
+                //计算两次点击的时间间隔
                 long deltaTime = clickTime - lastClickTime;
                 if (deltaTime < DOUBLE_CLICK_TIME_DELTA) {
                     // 在这里处理双击事件
-//                    handleDoubleClick(v);
+                    toggleZoom(v);
                 }
+                v.bringToFront();
                 lastClickTime = clickTime;
                 break;
             case MotionEvent.ACTION_MOVE:
-                // Calculate the delta change in position
-                int dX = x - (int) v.getTag(R.id.tag_video_view_origin_x);
-                int dY = y - (int) v.getTag(R.id.tag_video_view_origin_y);
+                // 当手指移动时，计算偏移量，并移动 VideoView
+                int dX = (int) (event.getRawX() - (float) v.getTag(R.id.tag_video_view_origin_x));
+                int dY = (int) (event.getRawY() - (float) v.getTag(R.id.tag_video_view_origin_y));
 
-                // Calculate the new position for the VideoView
-                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();
-                int newX = (int) (layoutParams.leftMargin + dX);
-                int newY = (int) (layoutParams.topMargin + dY);
+//                int l = v.getLeft() + dX;
+//                int t = v.getTop() + dY;
+//                int r = v.getRight() + dX;
+//                int b = v.getBottom() + dY;
+//
+//                v.layout(l,t,r,b);
 
-                // Get the dimensions of the RelativeLayout container
-                int containerWidth = container.getWidth();
-                int containerHeight = container.getHeight();
-
-                // Calculate the maximum allowed position to stay within the RelativeLayout bounds
-                int maxLeft = containerWidth - v.getWidth();
-                int maxTop = containerHeight - v.getHeight();
-
-                // Limit the new position to stay within the RelativeLayout bounds
-                newX = Math.max(0, Math.min(newX, maxLeft));
-                newY = Math.max(0, Math.min(newY, maxTop));
-
-                // Update the layout parameters
-                layoutParams.leftMargin = newX;
-                layoutParams.topMargin = newY;
+                layoutParams.leftMargin += dX;
+                layoutParams.rightMargin -= dX;
+                layoutParams.topMargin += dY;
+                layoutParams.bottomMargin -= dY;
                 v.setLayoutParams(layoutParams);
+                // 更新初始位置
+                v.setTag(R.id.tag_video_view_origin_x, event.getRawX());
+                v.setTag(R.id.tag_video_view_origin_y, event.getRawY());
 
-                // Update the initial position for the next move
-                v.setTag(R.id.tag_video_view_origin_x, x);
-                v.setTag(R.id.tag_video_view_origin_y, y);
                 break;
             case MotionEvent.ACTION_UP:
-                int currentX = x - offsetX;
-                int currentRight = currentX + v.getWidth();
-                if (currentX < 0 || currentRight > container.getWidth()) {
-                    container.removeView(v);
+                int containerWidth = container.getWidth();
+                int containerHeight = container.getHeight();
+                int vWidth = v.getWidth();
+                int vHeight = v.getHeight();
+                if (layoutParams.leftMargin < 0 || layoutParams.rightMargin > 0 ||
+                        (layoutParams.leftMargin + vWidth) > containerWidth ||
+                        (layoutParams.rightMargin +vWidth) > containerWidth) {
+                    if(NUM_VIDEOS > 1){
+                        NUM_VIDEOS --;
+                        numEdit.setText(String.valueOf(NUM_VIDEOS));
+                        container.removeView(v);
+                    }else {
+                        Toast.makeText(this,"请留下一个窗口吧",Toast.LENGTH_SHORT).show();
+                    }
+                }else if (layoutParams.topMargin < 0 || layoutParams.bottomMargin > 0 ||
+                        (layoutParams.topMargin + vHeight) > containerHeight ||
+                        (layoutParams.bottomMargin + vHeight) > containerHeight) {
+                    if(NUM_VIDEOS > 1){
+                        NUM_VIDEOS --;
+                        numEdit.setText(String.valueOf(NUM_VIDEOS));
+                        container.removeView(v);
+                    }else {
+                        Toast.makeText(this,"请留下一个窗口吧",Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
         }
@@ -295,11 +315,11 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     class MyFloatingThread extends Thread {
-        private  MediaCodecSurfaceViews surfaceView;
+        private MediaCodecSurfaceViews surfaceView;
 
         public MyFloatingThread() {
         }
-        
+
         public MyFloatingThread(MediaCodecSurfaceViews surfaceView) {
             this.surfaceView = surfaceView;
         }
@@ -308,11 +328,11 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         public void run() {
             int times = 0;
             while (times < 30) {
-                if (type.contains("hard") ? hardRecScreen(surfaceView) :  softRecScreen()) {
+                if (type.contains("hard") ? hardRecScreen(surfaceView) : softRecScreen()) {
                     break;
                 } else {
                     times++;
-                    Log.e(TAG, "not rec" + times +"次");
+                    Log.e(TAG, "not rec" + times + "次");
                 }
 
             }
@@ -332,7 +352,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
             Log.e(TAG, "createReceiver" + receiver);
             int continuous = 0;
-            while(!mStopFlag) {
+            while (!mStopFlag) {
 
                 byte[] streamBuffer = recvRtspVideoPacket(30);
                 System.out.println(streamBuffer.length);
@@ -342,7 +362,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                     continue;
                 } else {
                     continuous = 0;
-                    if(isFirstFrame) {
+                    if (isFirstFrame) {
                         isFirstFrame = false;
                         continue;
                     }
@@ -358,7 +378,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     private boolean softRecScreen() {
 
         InitffmpegRTP();//初始化软解码
-        
+
         try {
             int receiver = createRtspReceiver(uri);
             if (receiver != 0) {
@@ -371,7 +391,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
             Log.e(TAG, "createReceiver" + receiver);
             int continuous = 0;
-            while(!mStopFlag) {
+            while (!mStopFlag) {
 
                 byte[] streamBuffer = recvRtspVideoPacket(30);
                 System.out.println(streamBuffer.length);
@@ -381,7 +401,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                     continue;
                 } else {
                     continuous = 0;
-                    if(isFirstFrame) {
+                    if (isFirstFrame) {
                         isFirstFrame = false;
                         continue;
                     }
@@ -394,15 +414,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
-    private void handleDoubleClick(View v) {
-        // 在这里处理双击事件的逻辑
-        // 例如，执行双击后的操作或显示提示
-        int videoWidth = 200; // 设置视频宽度
-        int videoHeight = 150; // 设置视频高度
-        // 设置 VideoView 的位置和大小
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(videoWidth, videoHeight);
-        v.setLayoutParams(params);
-    }
+
 
     public static native int createRtspReceiver(String url);
 

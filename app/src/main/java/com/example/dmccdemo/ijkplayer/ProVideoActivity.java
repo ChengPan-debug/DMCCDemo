@@ -52,7 +52,6 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
     public static final int REQUEST_WRITE_STORAGE = 111;
 
     private String mVideoPath;
-    private Uri mVideoUri;
 
     private ProVideoView videoView,videoView2,videoView3,videoView4,videoView5,videoView6;        // 播放器View
 
@@ -93,39 +92,7 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
         videoView6 = findViewById(R.id.video_view6);
 
         // handle arguments
-        mVideoPath = "rtsp://192.168.20.222:8554/10002/20230803165048";
-
-        Intent intent = getIntent();
-        String intentAction = intent.getAction();
-        if (!TextUtils.isEmpty(intentAction)) {
-            if (intentAction.equals(Intent.ACTION_VIEW)) {
-                mVideoPath = intent.getDataString();
-            } else if (intentAction.equals(Intent.ACTION_SEND)) {
-                mVideoUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                    String scheme = mVideoUri.getScheme();
-
-                    if (TextUtils.isEmpty(scheme)) {
-                        Log.e(TAG, "Null unknown scheme\n");
-                        finish();
-                        return;
-                    }
-
-                    if (scheme.equals(ContentResolver.SCHEME_ANDROID_RESOURCE)) {
-                        mVideoPath = mVideoUri.getPath();
-                    } else if (scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-                        Log.e(TAG, "Can not resolve content below Android-ICS\n");
-                        finish();
-                        return;
-                    } else {
-                        Log.e(TAG, "Unknown scheme " + scheme + "\n");
-                        finish();
-                        return;
-                    }
-                }
-            }
-        }
+        mVideoPath = "rtsp://192.168.20.222:8554/10002/20230804091306";
 
         mediaController = new VideoControllerView(this);
         mediaController.setMediaPlayer(videoView);
@@ -140,52 +107,6 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
         mediaController6 = new VideoControllerView(this);
         mediaController6.setMediaPlayer(videoView6);
 
-        videoView .setOnInfoListener((iMediaPlayer, arg1, arg2) -> {
-            switch (arg1) {
-                case IMediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING:
-                    Log.i(TAG, "MEDIA_INFO_VIDEO_TRACK_LAGGING");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
-                    Log.i(TAG, "MEDIA_INFO_VIDEO_RENDERING_START");
-                    videoView.setVisibility(View.VISIBLE);
-                    videoView2.setVisibility(View.VISIBLE);
-
-                    break;
-                case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
-                    Log.i(TAG, "MEDIA_INFO_BUFFERING_START");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
-                    Log.i(TAG, "MEDIA_INFO_BUFFERING_END");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH:
-                    Log.i(TAG, "MEDIA_INFO_NETWORK_BANDWIDTH");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
-                    Log.i(TAG, "MEDIA_INFO_BAD_INTERLEAVING");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
-                    Log.i(TAG, "MEDIA_INFO_NOT_SEEKABLE");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_METADATA_UPDATE:
-                    Log.i(TAG, "MEDIA_INFO_METADATA_UPDATE");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE:
-                    Log.i(TAG, "MEDIA_INFO_UNSUPPORTED_SUBTITLE");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT:
-                    Log.i(TAG, "MEDIA_INFO_SUBTITLE_TIMED_OUT");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_VIDEO_ROTATION_CHANGED:
-                    Log.i(TAG, "MEDIA_INFO_VIDEO_ROTATION_CHANGED");
-                    break;
-                case IMediaPlayer.MEDIA_INFO_AUDIO_RENDERING_START:
-                    Log.i(TAG, "MEDIA_INFO_AUDIO_RENDERING_START");
-                    break;
-            }
-
-            return false;
-        });
-
         if (mVideoPath != null) {
             videoView.setVideoPath(mVideoPath);
             videoView2.setVideoPath(mVideoPath);
@@ -193,17 +114,6 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
             videoView4.setVideoPath(mVideoPath);
             videoView5.setVideoPath(mVideoPath);
             videoView6.setVideoPath(mVideoPath);
-        } else if (mVideoUri != null) {
-            videoView.setVideoURI(mVideoUri);
-            videoView2.setVideoURI(mVideoUri);
-            videoView3.setVideoURI(mVideoUri);
-            videoView4.setVideoURI(mVideoUri);
-            videoView5.setVideoURI(mVideoUri);
-            videoView6.setVideoURI(mVideoUri);
-        } else {
-            Log.e(TAG, "Null Data Source\n");
-            finish();
-            return;
         }
 
         videoView.start();
@@ -224,6 +134,10 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
                 if (videoView.isInPlaybackState()) {
                     videoView.toggleMediaControlsVisibility();
                     videoView2.toggleMediaControlsVisibility();
+                    videoView3.toggleMediaControlsVisibility();
+                    videoView4.toggleMediaControlsVisibility();
+                    videoView5.toggleMediaControlsVisibility();
+                    videoView6.toggleMediaControlsVisibility();
                     return true;
                 }
 
@@ -261,6 +175,8 @@ public class ProVideoActivity extends AppCompatActivity implements View.OnTouchL
         videoView2.stopPlayback();
         videoView3.stopPlayback();
         videoView4.stopPlayback();
+        videoView5.stopPlayback();
+        videoView6.stopPlayback();
     }
 
     @Override

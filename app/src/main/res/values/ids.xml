@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <item type="id" name="tag_video_view_origin_x" />
     <item type="id" name="tag_video_view_origin_y" />
+
+    <item type="id" name="tag_view_scale" />
 </resources>
